@@ -12,7 +12,7 @@ warnings for PvP / high-risk / members worlds apply unchanged.
 
 ## Config
 
-- **Show hop message** – print "Hopping to World XXX.." in the chatbox when a hop starts.
+- **Show hop message**: print "Hopping to World XXX.." in the chatbox when a hop starts.
 
 ## Limitations
 

@@ -36,10 +36,9 @@ import net.runelite.http.api.worlds.WorldResult;
 )
 public class ChatWorldHopPlugin extends Plugin
 {
-	// Same as the core World Hopper: how many ticks to spend trying to open the world switcher
 	private static final int DISPLAY_SWITCHER_MAX_ATTEMPTS = 3;
 
-	// Each chat line owns 4 dynamic children in the scroll area; the message text is the second one
+	// Each chat line has 4 dynamic children in the scroll area; the message text is the second
 	private static final int CHAT_LINE_CHILDREN = 4;
 	private static final int CHAT_LINE_MESSAGE_OFFSET = 1;
 
@@ -85,8 +84,6 @@ public class ChatWorldHopPlugin extends Plugin
 			return;
 		}
 
-		// Chat lines LINE0..LINEn are consecutive static children of the chatbox; each maps to
-		// a group of 4 dynamic children in the scroll area (see ChatHistoryPlugin in runelite).
 		final int lineIndex = lineChildId - WidgetUtil.componentToId(InterfaceID.Chatbox.LINE0);
 		final Widget messageWidget = scrollArea.getChild(lineIndex * CHAT_LINE_CHILDREN + CHAT_LINE_MESSAGE_OFFSET);
 		if (messageWidget == null || messageWidget.getText() == null)
@@ -94,8 +91,7 @@ public class ChatWorldHopPlugin extends Plugin
 			return;
 		}
 
-		final String message = Text.removeTags(messageWidget.getText());
-		final List<Integer> worlds = WorldMentionParser.parse(message);
+		final List<Integer> worlds = WorldMentionParser.parse(Text.removeTags(messageWidget.getText()));
 		if (worlds.isEmpty())
 		{
 			return;
@@ -104,15 +100,11 @@ public class ChatWorldHopPlugin extends Plugin
 		final WorldResult worldResult = worldService.getWorlds();
 		if (worldResult == null)
 		{
-			log.debug("World list not available yet; not adding hop entries");
+			log.debug("World list not available yet");
 			return;
 		}
 
 		final int currentWorld = client.getWorld();
-
-		// Insert just above "Cancel" (index 1). Each insert pushes earlier ones up, so iterating
-		// in mention order lists the first-mentioned world closest to Cancel, which reads top-down
-		// in the order the worlds appear in the message.
 		for (final int worldId : worlds)
 		{
 			if (worldId == currentWorld || worldResult.findWorld(worldId) == null)
@@ -120,6 +112,7 @@ public class ChatWorldHopPlugin extends Plugin
 				continue;
 			}
 
+			// Index 1 is just above Cancel; inserting in mention order keeps that order top-down
 			client.getMenu().createMenuEntry(1)
 				.setOption("Hop to world " + worldId)
 				.setTarget("")
@@ -128,10 +121,7 @@ public class ChatWorldHopPlugin extends Plugin
 		}
 	}
 
-	/**
-	 * If this menu was opened on a chat line that has player options (Add friend / Report / ...),
-	 * return that line's child id within the chatbox interface, otherwise -1.
-	 */
+	// Returns the chatbox child id of the chat line this menu was opened on, or -1
 	private int findChatLineChildId(MenuEntry[] entries)
 	{
 		for (MenuEntry entry : entries)
@@ -217,7 +207,7 @@ public class ChatWorldHopPlugin extends Plugin
 			return;
 		}
 
-		// hopToWorld requires the world switcher to be loaded, so open it and retry next tick
+		// The world switcher must be loaded before hopToWorld works
 		if (client.getWidget(InterfaceID.Worldswitcher.BUTTONS) == null)
 		{
 			client.openWorldHopper();
@@ -248,11 +238,11 @@ public class ChatWorldHopPlugin extends Plugin
 		displaySwitcherAttempts = 0;
 	}
 
-	private void sendConsoleMessage(String runeLiteFormattedMessage)
+	private void sendConsoleMessage(String message)
 	{
 		chatMessageManager.queue(QueuedMessage.builder()
 			.type(ChatMessageType.CONSOLE)
-			.runeLiteFormattedMessage(runeLiteFormattedMessage)
+			.runeLiteFormattedMessage(message)
 			.build());
 	}
 }
