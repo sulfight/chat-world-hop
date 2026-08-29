@@ -14,7 +14,7 @@ warnings for PvP / high-risk / members worlds apply unchanged.
 
 - **Show hop message**: print "Hopping to World XXX.." in the chatbox when a hop starts.
 
-## Limitations
+## Notes
 
 - Menu entries are only added on lines that have player options (Add friend / Report etc.),
   i.e. messages from other players. Game messages and your own messages are not handled.
